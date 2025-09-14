@@ -1,0 +1,464 @@
+{% extends 'base.html' %}
+{% block body %}
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+        body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+
+  box-sizing: border-box;
+} 
+
+.page-container {
+  display: flex;
+  max-width: 1400px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 24px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+  min-height: calc(100vh - 40px);
+  overflow: hidden;
+}
+
+.sidebar {
+  width: 320px;
+  padding: 40px 30px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar h2 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 40px;
+  color: #ffffff;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+  letter-spacing: -0.5px;
+  position: relative;
+  text-align: center;
+}
+
+.sidebar h2::before {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #ffffff, transparent);
+  border-radius: 2px;
+}
+
+.sidebar a {
+  background: rgba(255, 255, 255, 0.95);
+  color: #4a2c5b;
+  border: none;
+  padding: 16px 24px;
+  border-radius: 16px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  text-align: center;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.sidebar a:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.mood-tracker {
+  margin: 40px 0;
+  text-align: center;
+}
+
+.mood-tracker h3 {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  opacity: 0.9;
+}
+
+.mood-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  max-width: 280px;
+  margin: 0 auto;
+}
+
+.mood {
+  font-size: 20px;
+  padding: 12px;
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mood:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: scale(1.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.mood.selected {
+  background: rgba(102, 126, 234, 0.2);
+  border-color: rgba(102, 126, 234, 0.5);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.journal-sheet {
+  flex: 1;
+  background: linear-gradient(white, #fdfbf9), url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+  margin: 30px;
+  border-radius: 20px;
+  padding: 50px 60px;
+  position: relative;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.journal-sheet::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    linear-gradient(90deg, transparent 79px, rgba(220, 220, 220, 0.3) 80px, transparent 81px),
+    repeating-linear-gradient(transparent, transparent 29px, rgba(220, 220, 220, 0.2) 30px);
+  border-radius: 20px;
+  pointer-events: none;
+}
+
+/* Spiral binding design */
+.spiral-binding {
+  position: absolute;
+  left: 40px;
+  top: 30px;
+  bottom: 30px;
+  width: 25px;
+  background: linear-gradient(to bottom, rgba(200, 200, 200, 0.3), rgba(150, 150, 150, 0.3));
+  border-radius: 12px;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.spiral-binding::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at center, 
+      rgba(180, 180, 180, 0.6) 0%, 
+      rgba(180, 180, 180, 0.6) 20%, 
+      transparent 25%,
+      transparent 35%,
+      rgba(180, 180, 180, 0.4) 40%,
+      rgba(180, 180, 180, 0.4) 60%,
+      transparent 65%
+    );
+  background-size: 25px 40px;
+  background-repeat: repeat-y;
+  border-radius: 12px;
+}
+
+/* Individual spiral rings for more detail */
+.spiral-ring {
+  position: absolute;
+  left: -28px;
+  width: 91px;
+  height: 15px;
+  border: 4px solid rgba(106, 106, 106, 0.85);
+  border-radius: 50%;
+  background: linear-gradient(135deg, 
+    rgba(200, 200, 200, 0.3), 
+    rgba(220, 220, 220, 0.1)
+  );
+  box-shadow: 
+    inset 0 1px 2px rgba(255, 255, 255, 0.3),
+    0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.spiral-ring:nth-child(1) { top: 40px; }
+.spiral-ring:nth-child(2) { top: 80px; }
+.spiral-ring:nth-child(3) { top: 120px; }
+.spiral-ring:nth-child(4) { top: 160px; }
+.spiral-ring:nth-child(5) { top: 200px; }
+.spiral-ring:nth-child(6) { top: 240px; }
+.spiral-ring:nth-child(7) { top: 280px; }
+.spiral-ring:nth-child(8) { top: 320px; }
+.spiral-ring:nth-child(9) { top: 360px; }
+.spiral-ring:nth-child(10) { top: 400px; }
+.spiral-ring:nth-child(11) { top: 440px; }
+.spiral-ring:nth-child(12) { top: 480px; }
+.spiral-ring:nth-child(13) { top: 520px; }
+.spiral-ring:nth-child(14) { top: 560px; }
+.spiral-ring:nth-child(15) { top: 600px; }
+.spiral-ring:nth-child(16) { top: 640px; }
+.spiral-ring:nth-child(17) { top: 680px; }
+.spiral-ring:nth-child(18) { top: 720px; }
+.spiral-ring:nth-child(19) { top: 760px; }
+
+.journal-form {
+  position: relative;
+  z-index: 2;
+  margin-left: 60px;
+  display: flex;
+  flex-direction: column;
+}
+
+.journal-form label {
+  font-weight: 600;
+  margin-top: 30px;
+  margin-bottom: 8px;
+  color: #2c3e50;
+  font-size: 16px;
+  letter-spacing: 0.5px;
+}
+
+.journal-form label:first-of-type {
+  margin-top: 0;
+}
+
+.journal-form input[type="date"],
+.journal-form input[type="text"],
+.journal-form textarea {
+  width: 100%;
+  padding: 9px 24px;
+  border: 2px solid rgba(220, 220, 220, 0.6);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  font-size: 16px;
+  font-family: 'Inter', sans-serif;
+  color: #2c3e50;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+  backdrop-filter: blur(10px);
+}
+
+
+
+.journal-form textarea {
+  min-height: 300px;
+    line-height: 1.8;
+    background-image: repeating-linear-gradient(to bottom,
+        #fffdfb,
+        #fffdfb 28px,
+        #b7b5b5ff 29px);
+    background-size: 100% 30px;
+    font-size:16px;
+}
+
+.journal-form textarea::placeholder,
+.journal-form input::placeholder {
+  color: #95a5a6;
+  font-style: italic;
+}
+
+.journal-form button {
+  margin-top: 40px;
+  padding: 18px 32px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 16px;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  letter-spacing: 0.5px;
+  align-self: flex-start;
+}
+
+.journal-form button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+}
+
+.journal-form button:active {
+  transform: translateY(0);
+}
+
+/* Subtle floating elements for elegance */
+.floating-element {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.1;
+}
+
+.floating-element:nth-child(1) {
+  top: 15%;
+  left: 15%;
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(102, 126, 234, 0.1), transparent);
+  border-radius: 50%;
+  animation: gentleFloat 20s ease-in-out infinite;
+}
+
+.floating-element:nth-child(2) {
+  bottom: 20%;
+  right: 10%;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, rgba(118, 75, 162, 0.08), transparent);
+  border-radius: 50%;
+  animation: gentleFloat 25s ease-in-out infinite reverse;
+}
+
+@keyframes gentleFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(20px, -15px) scale(1.05); }
+  66% { transform: translate(-15px, 10px) scale(0.95); }
+}
+
+@media (max-width: 1200px) {
+  .sidebar {
+    width: 280px;
+  }
+  
+  .journal-sheet {
+    margin: 20px;
+    padding: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    flex-direction: column;
+    margin: 10px;
+    min-height: calc(100vh - 20px);
+  }
+  
+  .sidebar {
+    width: 100%;
+    padding: 30px 20px;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .journal-sheet {
+    margin: 0;
+    padding: 30px 20px;
+  }
+  
+  .journal-form {
+    margin-left: 60px;
+  }
+  
+  .spiral-binding {
+    left: 20px;
+  }
+  
+  .spiral-ring {
+    left: 22px;
+  }
+  
+  .mood-grid {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+  }
+  
+  .mood {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+}
+</style>
+<div class="page-container">
+  <aside class="sidebar">
+    <h2>Journal</h2>
+    <a href="{% url 'read_journals' %}">📖 Read Journals</a>
+
+    <div class="mood-tracker">
+      <h3>Select Your Mood:</h3>
+      <div class="mood-grid">
+        <button class="mood">😊</button>
+        <button class="mood">😐</button>
+        <button class="mood">😔</button>
+        <button class="mood">😡</button>
+        <button class="mood">😨</button>
+        <button class="mood">😴</button>
+        <button class="mood">🥳</button>
+        <button class="mood">🤯</button>
+        <button class="mood">💖</button>
+        <button class="mood">😌</button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="journal-sheet">
+  
+      <div class="spiral-binding"></div>
+      <div class="spiral-ring"></div>
+      <div class="spiral-ring"></div>
+      <div class="spiral-ring"></div>
+      <div class="spiral-ring"></div>
+      <div class="spiral-ring"></div>
+      <div class="spiral-ring"></div>
+      <div class="spiral-ring"></div>
+      <div class="spiral-ring"></div>
+      <div class="spiral-ring"></div>
+      <div class="spiral-ring"></div>
+      <div class="spiral-ring"></div>
+      <div class="spiral-ring"></div>
+      <div class="spiral-ring"></div>
+      <div class="spiral-ring"></div>
+      <div class="spiral-ring"></div>
+      <div class="spiral-ring"></div>
+      <div class="spiral-ring"></div>
+      <div class="spiral-ring"></div>
+      <div class="spiral-ring"></div>
+      <div class="spiral-ring"></div>
+
+    <form class="journal-form" method="POST">
+      {% if selected_entry %}
+      {% csrf_token %}
+
+      <label for="date">Date</label>
+      <input type="date" id="date" name="date" value="{{selected_entry.date|date:'Y-m-d'}}" required>
+      <label for="topic">Topic</label>
+      <input type="text" id="topic" name="topic" value="{{selected_entry.topic}}" required>
+      <label for="entry">Entry</label>
+      <textarea id="entry" name="entry" rows="12" required>{{selected_entry.entry}}</textarea>
+      <button type="submit">Edit Entry</button>
+      {% endif %}
+    </form>
+  </main>
+</div>
+</body>
+
+</html>
+{% endblock %}
